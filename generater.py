@@ -8,6 +8,8 @@ import zlib
 import pathlib
 
 # 定数類
+SOURCE_URL = 'https://dev.soracom.io/files/SIS_SVG.zip'
+OUTPUT_DIR = pathlib.Path(__file__).parent / 'dist' / 'output'
 FILE_NAME_FORMAT = 'SORACOM アイコンセット({}).xml'
 FILE_ROOT_FORMAT = '<mxlibrary>{}</mxlibrary>'
 MX_GRAPH_FORMAT = '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,{}" vertex="1" parent="1"><mxGeometry width="{}" height="{}" as="geometry"/></mxCell></root></mxGraphModel>'
@@ -57,15 +59,22 @@ def convertSVG(source):
         'aspect': 'fixed'
     }
 
+
 def makeTemplateFile(sorceDir):
     rootArray = []
-    for child in sorceDir.iterdir(): 
-        if '.svg'==child.suffix: rootArray.append(convertSVG(child))
+    for child in sorceDir.iterdir():
+        if '.svg' == child.suffix:
+            rootArray.append(convertSVG(child))
 
-    (sorceDir / FILE_NAME_FORMAT.format(sorceDir.name)).write_text(
+    (OUTPUT_DIR / FILE_NAME_FORMAT.format(sorceDir.name)).write_text(
         FILE_ROOT_FORMAT.format(json.dumps(rootArray))
     )
 
 
-if __name__ == "__main__":
+def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    #使い捨て環境想定のためざっくり作る
     for child in pathlib.Path('R:/SIS_SVG/').iterdir(): makeTemplateFile(child)
+
+if __name__ == "__main__":
+    main()
