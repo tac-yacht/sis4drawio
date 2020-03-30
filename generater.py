@@ -1,14 +1,17 @@
 # インポート
-import gzip
 import json
 import base64
 import urllib.parse
 import xml.etree.ElementTree as ET
 import zlib
 import pathlib
+import urllib.request
+import zipfile
+import io
 
 # 定数類
 SOURCE_URL = 'https://dev.soracom.io/files/SIS_SVG.zip'
+SOURCE_DIR = pathlib.Path(__file__).parent / 'build' / 'svg'
 OUTPUT_DIR = pathlib.Path(__file__).parent / 'dist' / 'output'
 FILE_NAME_FORMAT = 'SORACOM アイコンセット({}).xml'
 FILE_ROOT_FORMAT = '<mxlibrary>{}</mxlibrary>'
@@ -71,10 +74,22 @@ def makeTemplateFile(sorceDir):
     )
 
 
+def getRemoteSourceFile():
+    req = urllib.request.Request(SOURCE_URL)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    with zipfile.ZipFile(io.BytesIO(body)) as existing_zip:
+        existing_zip.extractall(SOURCE_DIR)
+
+
 def main():
+    SOURCE_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     #使い捨て環境想定のためざっくり作る
-    for child in pathlib.Path('R:/SIS_SVG/').iterdir(): makeTemplateFile(child)
+
+    #getRemoteSourceFile()
+
+    for child in (SOURCE_DIR / 'SIS_SVG').iterdir(): makeTemplateFile(child)
 
 if __name__ == "__main__":
     main()
