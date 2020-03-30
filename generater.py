@@ -7,7 +7,9 @@ import xml.etree.ElementTree as ET
 import zlib
 import pathlib
 
-# 各アイコン処理に使う定数類
+# 定数類
+FILE_NAME_FORMAT = 'SORACOM アイコンセット({}).xml'
+FILE_ROOT_FORMAT = '<mxlibrary>{}</mxlibrary>'
 MX_GRAPH_FORMAT = '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="" style="shape=image;verticalLabelPosition=bottom;verticalAlign=top;imageAspect=0;aspect=fixed;image=data:image/svg+xml,{}" vertex="1" parent="1"><mxGeometry width="{}" height="{}" as="geometry"/></mxCell></root></mxGraphModel>'
 VIEW_BOX_INDEX_WIDTH = 2
 VIEW_BOX_INDEX_HEIGHT = 3
@@ -26,7 +28,7 @@ ET.register_namespace('', 'http://www.w3.org/2000/svg')
 
 def convertSVG(source):
     # 元になるSVGをbase64でエンコードする。ついでにviewBoxから高さと幅を取る
-    root = ET.parse().getroot()
+    root = ET.parse(source).getroot()
     viewBox = root.attrib['viewBox'].split()
 
     rawSVG = ET.tostring(root, encoding='UTF-8')
@@ -57,9 +59,13 @@ def convertSVG(source):
 
 def makeTemplateFile(sorceDir):
     rootArray = []
-    for child in sorceDir.iterdir(): print(child)
-#    rootArray.append(jsonNode)
+    for child in sorceDir.iterdir(): 
+        if '.svg'==child.suffix: rootArray.append(convertSVG(child))
+
+    (sorceDir / FILE_NAME_FORMAT.format(sorceDir.name)).write_text(
+        FILE_ROOT_FORMAT.format(json.dumps(rootArray))
+    )
 
 
 if __name__ == "__main__":
-    makeTemplateFile(pathlib.Path('R:/SIS_SVG/'))
+    for child in pathlib.Path('R:/SIS_SVG/').iterdir(): makeTemplateFile(child)
